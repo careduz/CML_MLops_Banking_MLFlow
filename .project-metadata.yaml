@@ -6,22 +6,22 @@ specification_version: 1.0
 prototype_version: 1.0
 
 runtimes:
-  - editor: JupyterLab
-    kernel: Python 3.10
-    edition: Nvidia GPU
   - editor: Workbench
-    kernel: Python 3.10
-    edition: Nvidia GPU
-  - editor: JupyterLab
     kernel: Python 3.10
     edition: Standard
+  - editor: JupyterLab
+    kernel: Python 3.10
+    edition: Nvidia GPU
   - editor: Workbench
+    kernel: Python 3.10
+    edition: Nvidia GPU
+  - editor: JupyterLab
     kernel: Python 3.10
     edition: Standard
 
 tasks:
   - type: run_session
-    name: Install Dependencies
+    name: Install dependencies
     script: 00_install_prerequisites.py
     short_summary: Install Dependencies
     kernel: python3
