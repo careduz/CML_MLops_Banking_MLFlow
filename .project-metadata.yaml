@@ -18,3 +18,21 @@ runtimes:
   - editor: Workbench
     kernel: Python 3.10
     edition: Standard
+
+tasks:
+  - type: run_session
+    name: Install Dependencies
+    script: 00_install_prerequisites.py
+    short_summary: Install Dependencies
+    kernel: python3
+    cpu: 2
+    memory: 4
+
+  - type: create_job
+    name: Generate data
+    entity_label: generate_data
+    script: 00_datagen.py
+    arguments: None
+    short_summary: Create job to generate fake data.
+    cpu: 2
+    memory: 4
