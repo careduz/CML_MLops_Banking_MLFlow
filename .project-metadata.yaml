@@ -1,0 +1,20 @@
+name: BMO MLOps Example
+description: "Demonstrates a number of concepts including web scraping, vector databases, model deployment, model usage, Langchain, application building, and instruction following/tuning."
+author: "Cloudera"
+date: "2024-06-21"
+specification_version: 1.0
+prototype_version: 1.0
+
+runtimes:
+  - editor: JupyterLab
+    kernel: Python 3.10
+    edition: Nvidia GPU
+  - editor: Workbench
+    kernel: Python 3.10
+    edition: Nvidia GPU
+  - editor: JupyterLab
+    kernel: Python 3.10
+    edition: Standard
+  - editor: Workbench
+    kernel: Python 3.10
+    edition: Standard
