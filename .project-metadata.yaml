@@ -23,7 +23,7 @@ tasks:
   - type: run_session
     name: Install dependencies
     script: 00_install_requirements.py
-    short_summary: Install Dependencies
+    short_summary: Install dependencies
     kernel: python3
     cpu: 2
     memory: 4
