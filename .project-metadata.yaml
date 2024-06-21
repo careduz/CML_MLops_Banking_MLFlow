@@ -22,7 +22,7 @@ runtimes:
 tasks:
   - type: run_session
     name: Install dependencies
-    script: 00_install_prerequisites.py
+    script: 00_install_requirements.py
     short_summary: Install Dependencies
     kernel: python3
     cpu: 2
