@@ -1,4 +1,4 @@
-#****************************************************************************
+# ****************************************************************************
 # (C) Cloudera, Inc. 2020-2023
 #  All rights reserved.
 #
@@ -35,19 +35,24 @@
 #  DATA.
 #
 # #  Author(s): Paul de Fusco
-#***************************************************************************/
+# ***************************************************************************/
 
 """
 Utils to manage deployment of XGBoost classifier in CML
 """
 from __future__ import print_function
+
+import json
+import os
+import secrets
+import time
 from pprint import pprint
+
 import cmlapi
 from cmlapi.rest import ApiException
-from pprint import pprint
-import json, secrets, os, time
 
-class ModelDeployment():
+
+class ModelDeployment:
     """
     Class to manage the model deployment of the xgboost model
     """
@@ -59,7 +64,9 @@ class ModelDeployment():
         self.experimentName = experimentName
         self.experimentId = experimentId
 
-    def registerModelFromExperimentRun(self, modelName, experimentId, experimentRunId, modelPath):
+    def registerModelFromExperimentRun(
+        self, modelName, experimentId, experimentRunId, modelPath
+    ):
         """
         Method to register a model from an Experiment Run
         This is an alternative to the mlflow method to register a model via the register_model parameter in the log_model method
@@ -68,19 +75,24 @@ class ModelDeployment():
         """
 
         CreateRegisteredModelRequest = {
-                                        "project_id": os.environ['CDSW_PROJECT_ID'],
-                                        "experiment_id" : experimentId,
-                                        "run_id": experimentRunId,
-                                        "model_name": modelName,
-                                        "model_path": modelPath
-                                       }
+            "project_id": os.environ["CDSW_PROJECT_ID"],
+            "experiment_id": experimentId,
+            "run_id": experimentRunId,
+            "model_name": modelName,
+            "model_path": modelPath,
+        }
 
         try:
             # Register a model.
-            api_response = self.client.create_registered_model(CreateRegisteredModelRequest)
+            api_response = self.client.create_registered_model(
+                CreateRegisteredModelRequest
+            )
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_registered_model: %s\n" % e)
+            raise (
+                "Exception when calling CMLServiceApi->create_registered_model: %s\n"
+                % e
+            )
 
         return api_response
 
@@ -89,14 +101,18 @@ class ModelDeployment():
         Method to create a PRD Project
         """
 
-        createProjRequest = {"name": "MLOps Banking PRD", "template":"git", "git_url":"https://github.com/pdefusco/CML_MLOps_Banking_Demo_PRD.git"}
+        createProjRequest = {
+            "name": "MLOps Banking PRD",
+            "template": "git",
+            "git_url": "https://github.com/pdefusco/CML_MLOps_Banking_Demo_PRD.git",
+        }
 
         try:
             # Create a new project
             api_response = self.client.create_project(createProjRequest)
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_project: %s\n" % e)
+            raise ("Exception when calling CMLServiceApi->create_project: %s\n" % e)
 
         return api_response
 
@@ -107,34 +123,34 @@ class ModelDeployment():
 
         try:
             # Return all projects, optionally filtered, sorted, and paginated.
-            search_filter = {"owner.username" : username}
+            search_filter = {"owner.username": username}
             search = json.dumps(search_filter)
             api_response = self.client.list_projects(search_filter=search)
-            #pprint(api_response)
+            # pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->list_projects: %s\n" % e)
+            raise ("Exception when calling CMLServiceApi->list_projects: %s\n" % e)
 
         return api_response
 
-    def createModel(self, projectId, modelName, modelId, description = "Enterprise AI"):
+    def createModel(self, projectId, modelName, modelId, description="Enterprise AI"):
         """
         Method to create a model
         """
 
         CreateModelRequest = {
-                                "project_id": projectId,
-                                "name" : modelName,
-                                "description": description,
-                                "registered_model_id": modelId,
-                                "disable_authentication": True
-                             }
+            "project_id": projectId,
+            "name": modelName,
+            "description": description,
+            "registered_model_id": modelId,
+            "disable_authentication": True,
+        }
 
         try:
             # Create a model.
             api_response = self.client.create_model(CreateModelRequest, projectId)
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_model: %s\n" % e)
+            raise ("Exception when calling CMLServiceApi->create_model: %s\n" % e)
 
         return api_response
 
@@ -145,18 +161,20 @@ class ModelDeployment():
 
         # Create Model Build
         CreateModelBuildRequest = {
-                                    "registered_model_version_id": modelVersionId,
-                                    "runtime_identifier": runtimeId,
-                                    "comment": "invoking model build",
-                                    "model_id": modelCreationId
-                              }
+            "registered_model_version_id": modelVersionId,
+            "runtime_identifier": runtimeId,
+            "comment": "invoking model build",
+            "model_id": modelCreationId,
+        }
 
         try:
             # Create a model build.
-            api_response = self.client.create_model_build(CreateModelBuildRequest, projectId, modelCreationId)
+            api_response = self.client.create_model_build(
+                CreateModelBuildRequest, projectId, modelCreationId
+            )
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_model_build: %s\n" % e)
+            raise ("Exception when calling CMLServiceApi->create_model_build: %s\n" % e)
 
         return api_response
 
@@ -165,16 +183,18 @@ class ModelDeployment():
         Method to deploy a model build
         """
 
-        CreateModelDeploymentRequest = {
-          "cpu" : "2",
-          "memory" : "4"
-        }
+        CreateModelDeploymentRequest = {"cpu": "2", "memory": "4"}
 
         try:
             # Create a model deployment.
-            api_response = self.client.create_model_deployment(CreateModelDeploymentRequest, projectId, modelCreationId, modelBuildId)
+            api_response = self.client.create_model_deployment(
+                CreateModelDeploymentRequest, projectId, modelCreationId, modelBuildId
+            )
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_model_deployment: %s\n" % e)
+            raise (
+                "Exception when calling CMLServiceApi->create_model_deployment: %s\n"
+                % e
+            )
 
         return api_response

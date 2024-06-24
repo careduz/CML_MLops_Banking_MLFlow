@@ -85,7 +85,7 @@ class ModelReDeployment:
             )
             # pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_model_build: %s\n" % e)
+            raise ("Exception when calling CMLServiceApi->create_model_build: %s\n" % e)
 
         return api_response
 
@@ -103,7 +103,7 @@ class ModelReDeployment:
             )
             pprint(api_response)
         except ApiException as e:
-            print(
+            raise (
                 "Exception when calling CMLServiceApi->create_model_deployment: %s\n"
                 % e
             )
@@ -130,7 +130,7 @@ class ModelReDeployment:
             )
             # pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->list_runtimes: %s\n" % e)
+            raise ("Exception when calling CMLServiceApi->list_runtimes: %s\n" % e)
 
         return api_response
 
@@ -159,7 +159,7 @@ class ModelReDeployment:
             )
             pprint(api_response)
         except ApiException as e:
-            print(
+            raise (
                 "Exception when calling CMLServiceApi->create_registered_model: %s\n"
                 % e
             )
