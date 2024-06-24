@@ -37,22 +37,25 @@
 # #  Author(s): Paul de Fusco
 # ***************************************************************************/
 
-import os, warnings, sys, logging
-import mlflow
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, recall_score
-import mlflow.sklearn
-from xgboost import XGBClassifier
+import logging
+import os
+import sys
+import warnings
 from datetime import date
-import cml.data_v1 as cmldata
-import pyspark.pandas as ps
 
+import cml.data_v1 as cmldata
+import mlflow
+import mlflow.sklearn
+import numpy as np
+import pandas as pd
+import pyspark.pandas as ps
+from sklearn.metrics import accuracy_score, recall_score
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
 
 USERNAME = os.environ["PROJECT_OWNER"]
 DBNAME = os.environ["DATABASE"]
-CONNECTION_NAME = "go01-aw-dl"
+CONNECTION_NAME = os.environ["CONNECTION_NAME"]
 
 DATE = date.today()
 EXPERIMENT_NAME = "xgb-cc-fraud-{0}".format(USERNAME)
