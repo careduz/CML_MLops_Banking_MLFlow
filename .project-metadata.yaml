@@ -20,12 +20,12 @@ runtimes:
   - editor: Workbench
     kernel: Python 3.9
     edition: Standard
-    addons: ["Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2"]
+    addons: ["Spark 3.3.0 - CDE 1.20.3 - HOTFIX-2"]
     version: "2024.02"
   - editor: JupyterLab
     kernel: Python 3.9
     edition: Standard
-    addons: ["Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2"]
+    addons: ["Spark 3.3.0 - CDE 1.20.3 - HOTFIX-2"]
 
 tasks:
   - type: run_session
@@ -102,6 +102,24 @@ tasks:
     script: 00_datagen.py
     arguments: None
     short_summary: Generating fake data
+    cpu: 2
+    memory: 4
+
+  - type: run_session
+    name: Train model
+    entity_label: train_model
+    script: 01_train_xgboost.py
+    arguments: None
+    short_summary: Training first model
+    cpu: 2
+    memory: 4
+
+  - type: run_session
+    name: Deploy model
+    entity_label: deploy_first_model
+    script: 02_api_deployment.py
+    arguments: None
+    short_summary: Training first model
     cpu: 2
     memory: 4
 
