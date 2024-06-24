@@ -41,7 +41,7 @@ tasks:
     entity_label: generate_data
     script: 00_datagen.py
     arguments: None
-    short_summary: Create job to generate fake data.
+    short_summary: Create job - generate fake data
     cpu: 2
     memory: 4
 
