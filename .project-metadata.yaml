@@ -44,3 +44,12 @@ tasks:
     short_summary: Create job to generate fake data.
     cpu: 2
     memory: 4
+
+  - type: create_job
+    name: Pull git
+    entity_label: pull_git
+    cpu: 0.5
+    memory: 0.5
+    script: cml/pull_git.py
+    arguments: None
+    short_summary: Create job - git pull
