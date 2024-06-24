@@ -80,15 +80,6 @@ tasks:
     arguments: None
     short_summary: Create job - simulate model
 
-  - type: create_job
-    name: Update jobs
-    entity_label: update_jobs
-    cpu: 2
-    memory: 2
-    script: 06_model_simulation.py
-    arguments: None
-    short_summary: Setting job dependencies
-
   - type: run_session
     name: Set job dependencies
     script: cml/update_jobs.py
