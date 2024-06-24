@@ -5,14 +5,22 @@ date: "2024-06-21"
 specification_version: 1.0
 prototype_version: 1.0
 
+environment_variables:
+  DATABASE:
+    default: ""
+    description: "Database to use for the data. It is created if it does not exist."
+  CONNECTION_NAME:
+    default: "go01-aw-dl"
+    description: "Default connection name to DL"
+  STORAGE:
+    default: "s3a://go01-demo"
+    description: "Object storage path"
+
 runtimes:
   - editor: Workbench
     kernel: Python 3.10
     edition: Standard
   - editor: JupyterLab
-    kernel: Python 3.10
-    edition: Nvidia GPU
-  - editor: Workbench
     kernel: Python 3.10
     edition: Nvidia GPU
   - editor: JupyterLab
