@@ -1,4 +1,4 @@
-#****************************************************************************
+# ****************************************************************************
 # (C) Cloudera, Inc. 2020-2023
 #  All rights reserved.
 #
@@ -35,17 +35,22 @@
 #  DATA.
 #
 # #  Author(s): Paul de Fusco
-#***************************************************************************/
+# ***************************************************************************/
 
 from __future__ import print_function
-import cmlapi
-from cmlapi.rest import ApiException
+
+import json
+import os
+import secrets
+import time
 from pprint import pprint
-import json, secrets, os, time
+
+import cmlapi
 import mlflow
+from cmlapi.rest import ApiException
 
 
-class ModelReDeployment():
+class ModelReDeployment:
     """
     Class to manage the model deployment of the xgboost model
     """
@@ -55,74 +60,83 @@ class ModelReDeployment():
         self.projectId = projectId
         self.username = username
 
-
-    def createModelBuild(self, projectId, modelVersionId, modelCreationId, runtimeId, cpu, mem, replicas):
+    def createModelBuild(
+        self, projectId, modelVersionId, modelCreationId, runtimeId, cpu, mem, replicas
+    ):
         """
         Method to create a Model build
         """
 
-
         # Create Model Build
         CreateModelBuildRequest = {
-                                    "registered_model_version_id": modelVersionId,
-                                    "runtime_identifier": runtimeId,
-                                    "comment": "invoking model build",
-                                    "model_id": modelCreationId,
-                                    "cpu": cpu,
-                                    "mem": mem,
-                                    "replicas": replicas
-                                  }
+            "registered_model_version_id": modelVersionId,
+            "runtime_identifier": runtimeId,
+            "comment": "invoking model build",
+            "model_id": modelCreationId,
+            "cpu": cpu,
+            "mem": mem,
+            "replicas": replicas,
+        }
 
         try:
             # Create a model build.
-            api_response = self.client.create_model_build(CreateModelBuildRequest, projectId, modelCreationId)
-            #pprint(api_response)
+            api_response = self.client.create_model_build(
+                CreateModelBuildRequest, projectId, modelCreationId
+            )
+            # pprint(api_response)
         except ApiException as e:
             print("Exception when calling CMLServiceApi->create_model_build: %s\n" % e)
 
         return api_response
-
 
     def createModelDeployment(self, modelBuildId, projectId, modelCreationId):
         """
         Method to deploy a model build
         """
 
-        CreateModelDeploymentRequest = {
-          "cpu" : "2",
-          "memory" : "4"
-        }
+        CreateModelDeploymentRequest = {"cpu": "2", "memory": "4"}
 
         try:
             # Create a model deployment.
-            api_response = self.client.create_model_deployment(CreateModelDeploymentRequest, projectId, modelCreationId, modelBuildId)
+            api_response = self.client.create_model_deployment(
+                CreateModelDeploymentRequest, projectId, modelCreationId, modelBuildId
+            )
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_model_deployment: %s\n" % e)
+            print(
+                "Exception when calling CMLServiceApi->create_model_deployment: %s\n"
+                % e
+            )
 
         return api_response
-
 
     def listRuntimes(self):
         """
         Method to list available runtimes
         """
-        search_filter = {"kernel": "Python 3.9", "edition": "Standard", "editor": "Workbench"}
+        search_filter = {
+            "kernel": "Python 3.9",
+            "edition": "Standard",
+            "editor": "Workbench",
+        }
         # str | Search filter is an optional HTTP parameter to filter results by.
         # Supported search filter keys are: [\"image_identifier\", \"editor\", \"kernel\", \"edition\", \"description\", \"full_version\"].
         # For example:   search_filter = {\"kernel\":\"Python 3.7\",\"editor\":\"JupyterLab\"},. (optional)
         search = json.dumps(search_filter)
         try:
             # List the available runtimes, optionally filtered, sorted, and paginated.
-            api_response = self.client.list_runtimes(search_filter=search, page_size=1000)
-            #pprint(api_response)
+            api_response = self.client.list_runtimes(
+                search_filter=search, page_size=1000
+            )
+            # pprint(api_response)
         except ApiException as e:
             print("Exception when calling CMLServiceApi->list_runtimes: %s\n" % e)
 
         return api_response
 
-
-    def registerModelFromExperimentRun(self, modelName, experimentId, experimentRunId, modelPath):
+    def registerModelFromExperimentRun(
+        self, modelName, experimentId, experimentRunId, modelPath
+    ):
         """
         Method to register a model from an Experiment Run
         This is an alternative to the mlflow method to register a model via the register_model parameter in the log_model method
@@ -131,22 +145,26 @@ class ModelReDeployment():
         """
 
         CreateRegisteredModelRequest = {
-                                        "project_id": os.environ['CDSW_PROJECT_ID'],
-                                        "experiment_id" : experimentId,
-                                        "run_id": experimentRunId,
-                                        "model_name": modelName,
-                                        "model_path": modelPath
-                                       }
+            "project_id": os.environ["CDSW_PROJECT_ID"],
+            "experiment_id": experimentId,
+            "run_id": experimentRunId,
+            "model_name": modelName,
+            "model_path": modelPath,
+        }
 
         try:
             # Register a model.
-            api_response = self.client.create_registered_model(CreateRegisteredModelRequest)
+            api_response = self.client.create_registered_model(
+                CreateRegisteredModelRequest
+            )
             pprint(api_response)
         except ApiException as e:
-            print("Exception when calling CMLServiceApi->create_registered_model: %s\n" % e)
+            print(
+                "Exception when calling CMLServiceApi->create_registered_model: %s\n"
+                % e
+            )
 
         return api_response
-
 
     def get_latest_deployment_details(self, model_name):
         """
@@ -158,7 +176,7 @@ class ModelReDeployment():
 
         # gather model details
         models = (
-            self.client.list_models(project_id=project_id, async_req=True, page_size = 50)
+            self.client.list_models(project_id=project_id, async_req=True, page_size=50)
             .get()
             .to_dict()
         )
@@ -172,7 +190,7 @@ class ModelReDeployment():
         # gather latest build details
         builds = (
             self.client.list_model_builds(
-                project_id=project_id, model_id=model_id, async_req=True, page_size = 50
+                project_id=project_id, model_id=model_id, async_req=True, page_size=50
             )
             .get()
             .to_dict()
@@ -188,7 +206,7 @@ class ModelReDeployment():
                 model_id=model_id,
                 build_id=build_id,
                 async_req=True,
-                page_size = 50
+                page_size=50,
             )
             .get()
             .to_dict()
@@ -205,11 +223,11 @@ class ModelReDeployment():
             "latest_deployment_crn": model_deployment_crn,
         }
 
+
 username = os.environ["PROJECT_OWNER"]
-DBNAME = "BNK_MLOPS_HOL_"+username
-STORAGE = "s3a://go01-demo"
+DBNAME = os.environ["DATABASE"]
 CONNECTION_NAME = "go01-aw-dl"
-projectId = os.environ['CDSW_PROJECT_ID']
+projectId = os.environ["CDSW_PROJECT_ID"]
 
 # SET MLFLOW EXPERIMENT NAME
 experimentName = "xgb-cc-fraud-{0}".format(username)
@@ -217,8 +235,8 @@ experimentName = "xgb-cc-fraud-{0}".format(username)
 experimentId = mlflow.get_experiment_by_name(experimentName).experiment_id
 runsDf = mlflow.search_runs(experimentId, run_view_type=1)
 
-experimentId = runsDf.iloc[-1]['experiment_id']
-experimentRunId = runsDf.iloc[-1]['run_id']
+experimentId = runsDf.iloc[-1]["experiment_id"]
+experimentRunId = runsDf.iloc[-1]["run_id"]
 
 modelPath = "artifacts"
 modelName = "FraudCLF-" + username
@@ -226,7 +244,9 @@ modelName = "FraudCLF-" + username
 deployment = ModelReDeployment(projectId, username)
 getLatestDeploymentResponse = deployment.get_latest_deployment_details(modelName)
 
-registeredModelResponse = deployment.registerModelFromExperimentRun(modelName, experimentId, experimentRunId, modelPath)
+registeredModelResponse = deployment.registerModelFromExperimentRun(
+    modelName, experimentId, experimentRunId, modelPath
+)
 
 modelId = registeredModelResponse.model_id
 modelVersionId = registeredModelResponse.model_versions[0].model_version_id
@@ -239,9 +259,11 @@ cpu = 2
 mem = 4
 replicas = 1
 
-runtimeId = "docker.repository.cloudera.com/cloudera/cdsw/ml-runtime-workbench-python3.9-standard:2024.02.1-b4" #Modify as needed
+runtimeId = "docker.repository.cloudera.com/cloudera/cdsw/ml-runtime-workbench-python3.9-standard:2024.02.1-b4"  # Modify as needed
 
-createModelBuildResponse = deployment.createModelBuild(projectId, modelVersionId, modelCreationId, runtimeId, cpu, mem, replicas)
+createModelBuildResponse = deployment.createModelBuild(
+    projectId, modelVersionId, modelCreationId, runtimeId, cpu, mem, replicas
+)
 modelBuildId = createModelBuildResponse.id
 
 deployment.createModelDeployment(modelBuildId, projectId, modelCreationId)

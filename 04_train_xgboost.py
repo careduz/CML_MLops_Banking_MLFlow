@@ -1,4 +1,4 @@
-#****************************************************************************
+# ****************************************************************************
 # (C) Cloudera, Inc. 2020-2023
 #  All rights reserved.
 #
@@ -35,7 +35,7 @@
 #  DATA.
 #
 # #  Author(s): Paul de Fusco
-#***************************************************************************/
+# ***************************************************************************/
 
 import os, warnings, sys, logging
 import mlflow
@@ -51,8 +51,7 @@ import pyspark.pandas as ps
 
 # SET USER VARIABLES
 USERNAME = os.environ["PROJECT_OWNER"]
-DBNAME = "BNK_MLOPS_HOL_"+USERNAME
-STORAGE = "s3a://go01-demo"
+DBNAME = os.environ["DATABASE"]
 CONNECTION_NAME = "go01-aw-dl"
 
 # SET MLFLOW EXPERIMENT NAME
@@ -64,28 +63,47 @@ conn = cmldata.get_connection(CONNECTION_NAME)
 spark = conn.get_spark_session()
 
 # READ LATEST ICEBERG METADATA
-snapshot_id = spark.read.format("iceberg").load('{0}.CC_TRX_{1}.snapshots'.format(DBNAME, USERNAME)).select("snapshot_id").tail(1)[0][0]
-committed_at = spark.read.format("iceberg").load('{0}.CC_TRX_{1}.snapshots'.format(DBNAME, USERNAME)).select("committed_at").tail(1)[0][0].strftime('%m/%d/%Y')
-parent_id = spark.read.format("iceberg").load('{0}.CC_TRX_{1}.snapshots'.format(DBNAME, USERNAME)).select("parent_id").tail(1)[0][0]
+snapshot_id = (
+    spark.read.format("iceberg")
+    .load("{0}.CC_TRX_{1}.snapshots".format(DBNAME, USERNAME))
+    .select("snapshot_id")
+    .tail(1)[0][0]
+)
+committed_at = (
+    spark.read.format("iceberg")
+    .load("{0}.CC_TRX_{1}.snapshots".format(DBNAME, USERNAME))
+    .select("committed_at")
+    .tail(1)[0][0]
+    .strftime("%m/%d/%Y")
+)
+parent_id = (
+    spark.read.format("iceberg")
+    .load("{0}.CC_TRX_{1}.snapshots".format(DBNAME, USERNAME))
+    .select("parent_id")
+    .tail(1)[0][0]
+)
 
-incReadDf = spark.read\
-    .format("iceberg")\
-    .option("start-snapshot-id", parent_id)\
-    .option("end-snapshot-id", snapshot_id)\
+incReadDf = (
+    spark.read.format("iceberg")
+    .option("start-snapshot-id", parent_id)
+    .option("end-snapshot-id", snapshot_id)
     .load("{0}.CC_TRX_{1}".format(DBNAME, USERNAME))
+)
 
 df = incReadDf.toPandas()
 
 # SET MLFLOW TAGS
 tags = {
-  "iceberg_snapshot_id": snapshot_id,
-  "iceberg_snapshot_committed_at": committed_at,
-  "iceberg_parent_id": parent_id,
-  "row_count": df.count()
+    "iceberg_snapshot_id": snapshot_id,
+    "iceberg_snapshot_committed_at": committed_at,
+    "iceberg_parent_id": parent_id,
+    "row_count": df.count(),
 }
 
 # TRAIN TEST SPLIT DATA
-X_train, X_test, y_train, y_test = train_test_split(df.drop("fraud_trx", axis=1), df["fraud_trx"], test_size=0.3)
+X_train, X_test, y_train, y_test = train_test_split(
+    df.drop("fraud_trx", axis=1), df["fraud_trx"], test_size=0.3
+)
 
 # MLFLOW EXPERIMENT RUN
 with mlflow.start_run():
@@ -102,10 +120,13 @@ with mlflow.start_run():
 
     mlflow.log_param("accuracy", accuracy)
     mlflow.log_param("recall", recall)
-    mlflow.xgboost.log_model(model, artifact_path="artifacts")#, registered_model_name="my_xgboost_model"
+    mlflow.xgboost.log_model(
+        model, artifact_path="artifacts"
+    )  # , registered_model_name="my_xgboost_model"
     mlflow.set_tags(tags)
 
 mlflow.end_run()
+
 
 # MLFLOW CLIENT EXPERIMENT METADATA
 def getLatestExperimentInfo(experimentName):
@@ -114,14 +135,15 @@ def getLatestExperimentInfo(experimentName):
     """
     experimentId = mlflow.get_experiment_by_name(experimentName).experiment_id
     runsDf = mlflow.search_runs(experimentId, run_view_type=1)
-    experimentId = runsDf.iloc[-1]['experiment_id']
-    experimentRunId = runsDf.iloc[-1]['run_id']
+    experimentId = runsDf.iloc[-1]["experiment_id"]
+    experimentRunId = runsDf.iloc[-1]["run_id"]
 
     return experimentId, experimentRunId
 
+
 experimentId, experimentRunId = getLatestExperimentInfo(EXPERIMENT_NAME)
 
-#Replace Experiment Run ID here:
+# Replace Experiment Run ID here:
 run = mlflow.get_run(experimentRunId)
 
 pd.DataFrame(data=[run.data.params], index=["Value"]).T

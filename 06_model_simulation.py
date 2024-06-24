@@ -38,29 +38,35 @@
 #
 # ###########################################################################
 
+import copy
+import datetime
+import json
+import os
+import random
+import time
+
 import cdsw
-import time, os, random, json, copy
+import cml.data_v1 as cmldata
+import cmlapi
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from cmlbootstrap import CMLBootstrap
 from pyspark.sql import SparkSession
 from sklearn.metrics import classification_report
-import cmlapi
-from src.api import ApiUtility
-import cml.data_v1 as cmldata
-from utils import BankDataGen
-import datetime
 
-#---------------------------------------------------
+from src.api import ApiUtility
+from utils import BankDataGen
+
+# ---------------------------------------------------
 #               CREATE BATCH DATA
-#---------------------------------------------------
+# ---------------------------------------------------
 
 # SET USER VARIABLES
 USERNAME = os.environ["PROJECT_OWNER"]
-DBNAME = "BNK_MLOPS_HOL_{}".format(USERNAME)
-STORAGE = "s3a://go01-demo"
-CONNECTION_NAME = "go01-aw-dl"
+DBNAME = os.environ["DATABASE"]
+STORAGE = os.environ["STORAGE"]
+CONNECTION_NAME = os.environ["CONNECTION_NAME"]
 
 # Instantiate BankDataGen class
 dg = BankDataGen(USERNAME, DBNAME, STORAGE, CONNECTION_NAME)
@@ -81,12 +87,17 @@ client.list_models(project_id)
 # You can use an APIV2-based utility to access the latest model's metadata. For more, explore the src folder
 apiUtil = ApiUtility()
 
-modelName = "FraudCLF-" + username
+modelName = "FraudCLF-" + USERNAME
 
-Model_AccessKey = apiUtil.get_latest_deployment_details(model_name=modelName)["model_access_key"]
-Deployment_CRN = apiUtil.get_latest_deployment_details(model_name=modelName)["latest_deployment_crn"]
+Model_AccessKey = apiUtil.get_latest_deployment_details(model_name=modelName)[
+    "model_access_key"
+]
+Deployment_CRN = apiUtil.get_latest_deployment_details(model_name=modelName)[
+    "latest_deployment_crn"
+]
 
-#{"dataframe_split": {"columns": ["age", "credit_card_balance", "bank_account_balance", "mortgage_balance", "sec_bank_account_balance", "savings_account_balance", "sec_savings_account_balance", "total_est_nworth", "primary_loan_balance", "secondary_loan_balance", "uni_loan_balance", "longitude", "latitude", "transaction_amount"], "data":[[35.5, 20000.5, 3900.5, 14000.5, 2944.5, 3400.5, 12000.5, 29000.5, 1300.5, 15000.5, 10000.5, 2000.5, 90.5, 120.5]]}}
+# {"dataframe_split": {"columns": ["age", "credit_card_balance", "bank_account_balance", "mortgage_balance", "sec_bank_account_balance", "savings_account_balance", "sec_savings_account_balance", "total_est_nworth", "primary_loan_balance", "secondary_loan_balance", "uni_loan_balance", "longitude", "latitude", "transaction_amount"], "data":[[35.5, 20000.5, 3900.5, 14000.5, 2944.5, 3400.5, 12000.5, 29000.5, 1300.5, 15000.5, 10000.5, 2000.5, 90.5, 120.5]]}}
+
 
 def submitRequest(Model_AccessKey):
     """
@@ -94,16 +105,18 @@ def submitRequest(Model_AccessKey):
     """
 
     record = '{"dataframe_split": {"columns": ["age", "credit_card_balance", "bank_account_balance", "mortgage_balance", "sec_bank_account_balance", "savings_account_balance", "sec_savings_account_balance", "total_est_nworth", "primary_loan_balance", "secondary_loan_balance", "uni_loan_balance", "longitude", "latitude", "transaction_amount"]}}'
-    randomInts = [[random.uniform(1.01,500.01) for i in range(14)]]
+    randomInts = [[random.uniform(1.01, 500.01) for i in range(14)]]
     data = json.loads(record)
     data["dataframe_split"]["data"] = randomInts
     response = cdsw.call_model(Model_AccessKey, data)
 
     return response
 
+
 response_labels_sample = []
 percent_counter = 0
 percent_max = len(df)
+
 
 # This will randomly return True for input and increases the likelihood of returning
 # true based on `percent`
@@ -113,13 +126,16 @@ def bnkFraud(percent):
     else:
         return 0
 
+
 for i in range(1000):
-  print("Added {} records".format(percent_counter)) if (
-      percent_counter % 25 == 0
-  ) else None
-  percent_counter += 1
-  response = submitRequest(Model_AccessKey)
-  response_labels_sample.append(
+    (
+        print("Added {} records".format(percent_counter))
+        if (percent_counter % 25 == 0)
+        else None
+    )
+    percent_counter += 1
+    response = submitRequest(Model_AccessKey)
+    response_labels_sample.append(
         {
             "uuid": response["response"]["uuid"],
             "response_label": response["response"]["prediction"],

@@ -1,4 +1,4 @@
-#****************************************************************************
+# ****************************************************************************
 # (C) Cloudera, Inc. 2020-2023
 #  All rights reserved.
 #
@@ -35,7 +35,7 @@
 #  DATA.
 #
 # #  Author(s): Paul de Fusco
-#***************************************************************************/
+# ***************************************************************************/
 
 import os, warnings, sys, logging
 import mlflow
@@ -51,8 +51,7 @@ import pyspark.pandas as ps
 
 
 USERNAME = os.environ["PROJECT_OWNER"]
-DBNAME = "BNK_MLOPS_HOL_"+USERNAME
-STORAGE = "s3a://go01-demo"
+DBNAME = os.environ["DATABASE"]
 CONNECTION_NAME = "go01-aw-dl"
 
 DATE = date.today()
@@ -63,11 +62,13 @@ mlflow.set_experiment(EXPERIMENT_NAME)
 conn = cmldata.get_connection(CONNECTION_NAME)
 spark = conn.get_spark_session()
 
-df_from_sql = ps.read_table('{0}.CC_TRX_{1}'.format(DBNAME, USERNAME))
+df_from_sql = ps.read_table("{0}.CC_TRX_{1}".format(DBNAME, USERNAME))
 df = df_from_sql.to_pandas()
 
 test_size = 0.3
-X_train, X_test, y_train, y_test = train_test_split(df.drop("fraud_trx", axis=1), df["fraud_trx"], test_size=test_size)
+X_train, X_test, y_train, y_test = train_test_split(
+    df.drop("fraud_trx", axis=1), df["fraud_trx"], test_size=test_size
+)
 
 with mlflow.start_run():
 
@@ -75,12 +76,12 @@ with mlflow.start_run():
 
     # Step 1: cambiar test_size linea 69 y recorrer
     # Step 2: cambiar linea 74, agregar linea 97, y recorrer
-      # linea 75: model = XGBClassifier(use_label_encoder=False, max_depth=4, eval_metric="logloss")
-      # linea 97: mlflow.log_param("max_depth", 4)
+    # linea 75: model = XGBClassifier(use_label_encoder=False, max_depth=4, eval_metric="logloss")
+    # linea 97: mlflow.log_param("max_depth", 4)
     # Step 3: cambiar linea 74 y 97, agregar linea 98, y recorrer
-      # linea 75: model = XGBClassifier(use_label_encoder=False, max_depth=2, max_leaf_nodes=5, eval_metric="logloss")
-      # linea 97: mlflow.log_param("max_depth", 2)
-      # linea 98: mlflow.log_param("max_leaf_nodes", 5)
+    # linea 75: model = XGBClassifier(use_label_encoder=False, max_depth=2, max_leaf_nodes=5, eval_metric="logloss")
+    # linea 97: mlflow.log_param("max_depth", 2)
+    # linea 98: mlflow.log_param("max_leaf_nodes", 5)
 
     model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
     y_pred = model.predict(X_test)
@@ -96,7 +97,10 @@ with mlflow.start_run():
     # Step 2:
     # Step 3:
 
-    mlflow.xgboost.log_model(model, artifact_path="artifacts")#, registered_model_name="my_xgboost_model"
+    mlflow.xgboost.log_model(
+        model, artifact_path="artifacts"
+    )  # , registered_model_name="my_xgboost_model"
+
 
 def getLatestExperimentInfo(experimentName):
     """
@@ -104,14 +108,15 @@ def getLatestExperimentInfo(experimentName):
     """
     experimentId = mlflow.get_experiment_by_name(experimentName).experiment_id
     runsDf = mlflow.search_runs(experimentId, run_view_type=1)
-    experimentId = runsDf.iloc[-1]['experiment_id']
-    experimentRunId = runsDf.iloc[-1]['run_id']
+    experimentId = runsDf.iloc[-1]["experiment_id"]
+    experimentRunId = runsDf.iloc[-1]["run_id"]
 
     return experimentId, experimentRunId
 
+
 experimentId, experimentRunId = getLatestExperimentInfo(EXPERIMENT_NAME)
 
-#Replace Experiment Run ID here:
+# Replace Experiment Run ID here:
 run = mlflow.get_run(experimentRunId)
 
 pd.DataFrame(data=[run.data.params], index=["Value"]).T
