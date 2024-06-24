@@ -2,7 +2,6 @@ import os
 
 import cmlapi
 
-GENERATE_DATA_JOB_NAME = "generate data"
 PULL_GIT_JOB_NAME = "pull git"
 LOAD_DATA_JOB_NAME = "load data"
 RETRAIN_MODEL_JOB_NAME = "retrain model"
@@ -18,7 +17,6 @@ if __name__ == "__main__":
     project = client.get_project(project_id=os.getenv("CDSW_PROJECT_ID"))
     jobs_list = client.list_jobs(project.id)
 
-    generate_data_job = None
     pull_git_job = None
     load_data_job = None
     retrain_model_job = None
@@ -28,9 +26,6 @@ if __name__ == "__main__":
     for j in jobs_list.jobs:
         job_name = j.name.lower()
 
-        if GENERATE_DATA_JOB_NAME == job_name:
-            generate_data_job = j
-            continue
         if PULL_GIT_JOB_NAME == job_name:
             pull_git_job = j
             continue
@@ -48,7 +43,6 @@ if __name__ == "__main__":
             continue
 
     for x in [
-        generate_data_job,
         pull_git_job,
         load_data_job,
         retrain_model_job,
