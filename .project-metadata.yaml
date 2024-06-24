@@ -110,7 +110,7 @@ tasks:
     entity_label: train_model
     script: 01_train_xgboost.py
     arguments: None
-    short_summary: Training first model
+    short_summary: Training model
     cpu: 2
     memory: 4
 
@@ -119,7 +119,7 @@ tasks:
     entity_label: deploy_first_model
     script: 02_api_deployment.py
     arguments: None
-    short_summary: Training first model
+    short_summary: Deploying model
     cpu: 2
     memory: 4
 
