@@ -29,7 +29,6 @@ runtimes:
 
 tasks:
   - type: run_session
-    kernel: python3
     name: Install dependencies
     script: 00_install_requirements.py
     short_summary: Install dependencies
@@ -37,7 +36,6 @@ tasks:
     memory: 4
 
   - type: create_job
-    kernel: python3
     name: Pull git
     entity_label: pull_git
     cpu: 0.5
@@ -50,14 +48,12 @@ tasks:
     name: Generate data
     entity_label: generate_data
     script: 00_datagen.py
-    kernel: python3
     arguments: None
     short_summary: Generating fake data
     cpu: 2
     memory: 4
 
   - type: create_job
-    kernel: python3
     name: Load data
     entity_label: load_data
     cpu: 2
@@ -67,7 +63,6 @@ tasks:
     short_summary: Create job - load data
 
   - type: create_job
-    kernel: python3
     name: Retrain model
     entity_label: retrain_model
     cpu: 2
@@ -77,7 +72,6 @@ tasks:
     short_summary: Create job - retrain model
 
   - type: create_job
-    kernel: python3
     name: Deploy model
     entity_label: deploy_model
     cpu: 2
@@ -87,7 +81,6 @@ tasks:
     short_summary: Create job - deploy model
 
   - type: create_job
-    kernel: python3
     name: Run simulation
     entity_label: run_simulation
     cpu: 2
@@ -97,7 +90,6 @@ tasks:
     short_summary: Create job - simulate model
 
   - type: create_job
-    kernel: python3
     name: Update jobs
     entity_label: update_jobs
     cpu: 2
@@ -107,7 +99,6 @@ tasks:
     short_summary: Setting job dependencies
 
   - type: run_session
-    kernel: python3
     name: Set job dependencies
     script: cml/update_jobs.py
     short_summary: Update CML job dependencies
