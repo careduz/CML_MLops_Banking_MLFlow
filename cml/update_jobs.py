@@ -78,5 +78,5 @@ if __name__ == "__main__":
     client.update_job(
         project_id=project.id,
         job_id=load_data_job.id,
-        body={"type": "cron", "schedule": "*/30 * * * *"},
+        body={"type": "cron", "schedule": "0 */6 * * *"},
     )
