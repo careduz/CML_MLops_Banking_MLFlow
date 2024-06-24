@@ -20,12 +20,15 @@ runtimes:
   - editor: Workbench
     kernel: Python 3.10
     edition: Standard
+    addons: [spark330-20-hf2]
   - editor: JupyterLab
     kernel: Python 3.10
     edition: Nvidia GPU
+    addons: [spark330-20-hf2]
   - editor: JupyterLab
     kernel: Python 3.10
     edition: Standard
+    addons: [spark330-20-hf2]
 
 tasks:
   - type: run_session
