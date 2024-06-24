@@ -33,7 +33,7 @@ tasks:
     script: 00_install_requirements.py
     short_summary: Install dependencies
     cpu: 2
-    memory: 4
+    memory: 8
 
   - type: create_job
     name: Pull git
@@ -43,15 +43,6 @@ tasks:
     script: cml/pull_git.py
     arguments: None
     short_summary: Create job - git pull
-
-  - type: run_session
-    name: Generate data
-    entity_label: generate_data
-    script: 00_datagen.py
-    arguments: None
-    short_summary: Generating fake data
-    cpu: 2
-    memory: 4
 
   - type: create_job
     name: Load data
@@ -104,6 +95,15 @@ tasks:
     short_summary: Update CML job dependencies
     cpu: 2
     memory: 2
+
+  - type: run_session
+    name: Generate data
+    entity_label: generate_data
+    script: 00_datagen.py
+    arguments: None
+    short_summary: Generating fake data
+    cpu: 2
+    memory: 4
 
   - type: run_job
     entity_label: pull_git
