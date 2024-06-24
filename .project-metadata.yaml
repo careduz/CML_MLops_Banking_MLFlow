@@ -18,37 +18,26 @@ environment_variables:
 
 runtimes:
   - editor: Workbench
-    kernel: Python 3.10
+    kernel: Python 3.9
     edition: Standard
     addons: ["Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2"]
+    version: "2024.02"
   - editor: JupyterLab
-    kernel: Python 3.10
-    edition: Nvidia GPU
-    addons: ["Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2"]
-  - editor: JupyterLab
-    kernel: Python 3.10
+    kernel: Python 3.9
     edition: Standard
     addons: ["Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2"]
 
 tasks:
   - type: run_session
+    kernel: python3
     name: Install dependencies
     script: 00_install_requirements.py
     short_summary: Install dependencies
+    cpu: 2
+    memory: 4
+
+  - type: create_job
     kernel: python3
-    cpu: 2
-    memory: 4
-
-  - type: create_job
-    name: Generate data
-    entity_label: generate_data
-    script: 00_datagen.py
-    arguments: None
-    short_summary: Create job - generate fake data
-    cpu: 2
-    memory: 4
-
-  - type: create_job
     name: Pull git
     entity_label: pull_git
     cpu: 0.5
@@ -56,3 +45,75 @@ tasks:
     script: cml/pull_git.py
     arguments: None
     short_summary: Create job - git pull
+
+  - type: run_session
+    name: Generate data
+    entity_label: generate_data
+    script: 00_datagen.py
+    kernel: python3
+    arguments: None
+    short_summary: Generating fake data
+    cpu: 2
+    memory: 4
+
+  - type: create_job
+    kernel: python3
+    name: Load data
+    entity_label: load_data
+    cpu: 2
+    memory: 4
+    script: 03_newbatch.py
+    arguments: None
+    short_summary: Create job - load data
+
+  - type: create_job
+    kernel: python3
+    name: Retrain model
+    entity_label: retrain_model
+    cpu: 2
+    memory: 4
+    script: 04_train_xgboost.py
+    arguments: None
+    short_summary: Create job - retrain model
+
+  - type: create_job
+    kernel: python3
+    name: Deploy model
+    entity_label: deploy_model
+    cpu: 2
+    memory: 4
+    script: 05_api_redeployment.py
+    arguments: None
+    short_summary: Create job - deploy model
+
+  - type: create_job
+    kernel: python3
+    name: Run simulation
+    entity_label: run_simulation
+    cpu: 2
+    memory: 4
+    script: 06_model_simulation.py
+    arguments: None
+    short_summary: Create job - simulate model
+
+  - type: create_job
+    kernel: python3
+    name: Update jobs
+    entity_label: update_jobs
+    cpu: 2
+    memory: 2
+    script: 06_model_simulation.py
+    arguments: None
+    short_summary: Setting job dependencies
+
+  - type: run_session
+    kernel: python3
+    name: Set job dependencies
+    script: cml/update_jobs.py
+    short_summary: Update CML job dependencies
+    cpu: 2
+    memory: 2
+
+  - type: run_job
+    entity_label: pull_git
+    short_summary: Initializing git pull job
