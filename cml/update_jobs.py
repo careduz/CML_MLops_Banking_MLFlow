@@ -57,11 +57,12 @@ if __name__ == "__main__":
         body={"type": "cron", "schedule": "*/10 * * * *"},
     )
 
-    client.update_job(
-        project_id=project.id,
-        job_id=model_simulation_job.id,
-        body={"type": "dependent", "parent_id": deploy_model_job.id},
-    )
+    # TODO: Before enabling this dependency, need to update the simulation code to wait for the deploy job to complete; otherwise, it runs while model is deploying and fails.
+    # client.update_job(
+    #     project_id=project.id,
+    #     job_id=model_simulation_job.id,
+    #     body={"type": "dependent", "parent_id": deploy_model_job.id},
+    # )
 
     client.update_job(
         project_id=project.id,
